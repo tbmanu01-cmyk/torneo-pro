@@ -1,19 +1,17 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import type { Session } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth, AppSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { torneoSchema } from "@/lib/validations";
 import type { FormatoTorneo, EstadoTorneo } from "@prisma/client";
 
 type Ctx = { params: { id: string } };
 
-function canAdmin(session: Session | null, adminId: string) {
+function canAdmin(session: AppSession, adminId: string) {
   return session?.user.role === "SUPER_ADMIN" || session?.user.id === adminId;
 }
 
 export async function GET(_req: Request, { params }: Ctx) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
   const torneo = await prisma.torneo.findUnique({
@@ -34,7 +32,7 @@ export async function GET(_req: Request, { params }: Ctx) {
 }
 
 export async function PATCH(req: Request, { params }: Ctx) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
   const torneo = await prisma.torneo.findUnique({ where: { id: params.id } });
@@ -67,7 +65,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
 }
 
 export async function DELETE(_req: Request, { params }: Ctx) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
   const torneo = await prisma.torneo.findUnique({ where: { id: params.id } });

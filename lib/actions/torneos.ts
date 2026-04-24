@@ -1,20 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { auth, AppSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { torneoSchema } from "@/lib/validations";
 import type { FormatoTorneo, EstadoTorneo } from "@prisma/client";
 
 async function getSession() {
-  const s = await getServerSession(authOptions);
+  const s = await auth();
   if (!s) redirect("/login");
   return s;
 }
 
-function canAdmin(session: Awaited<ReturnType<typeof getSession>>, adminId: string) {
+function canAdmin(session: NonNullable<AppSession>, adminId: string) {
   return session.user.role === "SUPER_ADMIN" || session.user.id === adminId;
 }
 

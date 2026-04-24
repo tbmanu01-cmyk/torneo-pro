@@ -1,15 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { createUserAdminSchema, updateUserAdminSchema } from "@/lib/validations";
 import type { Role } from "@prisma/client";
 
 async function guardSuperAdmin() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session || session.user.role !== "SUPER_ADMIN") {
     throw new Error("No autorizado");
   }

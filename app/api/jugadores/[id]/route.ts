@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import type { Session } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth, AppSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { jugadorSchema } from "@/lib/validations";
 
 type Ctx = { params: { id: string } };
 
-async function getJugadorWithPerms(id: string, session: Session | null) {
+async function getJugadorWithPerms(id: string, session: AppSession) {
   const jugador = await prisma.jugador.findUnique({
     where: { id },
     include: {
@@ -25,7 +23,7 @@ async function getJugadorWithPerms(id: string, session: Session | null) {
 }
 
 export async function PATCH(req: Request, { params }: Ctx) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
   const jugador = await getJugadorWithPerms(params.id, session);
@@ -42,7 +40,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
 }
 
 export async function DELETE(_req: Request, { params }: Ctx) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
   const jugador = await getJugadorWithPerms(params.id, session);

@@ -1,15 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { equipoSchema } from "@/lib/validations";
 import type { EstadoPago } from "@prisma/client";
 
 async function getSession() {
-  const s = await getServerSession(authOptions);
+  const s = await auth();
   if (!s) redirect("/login");
   return s;
 }

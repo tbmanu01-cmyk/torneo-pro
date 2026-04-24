@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { equipoSchema } from "@/lib/validations";
 import type { EstadoPago } from "@prisma/client";
@@ -8,7 +7,7 @@ import type { EstadoPago } from "@prisma/client";
 type Ctx = { params: { id: string } };
 
 export async function GET(_req: Request, { params }: Ctx) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
   const equipos = await prisma.equipo.findMany({
@@ -24,7 +23,7 @@ export async function GET(_req: Request, { params }: Ctx) {
 }
 
 export async function POST(req: Request, { params }: Ctx) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 403 });
 
   const torneo = await prisma.torneo.findUnique({ where: { id: params.id } });
