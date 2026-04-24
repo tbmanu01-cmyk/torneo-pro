@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN_TORNEO
+  ASISTENTE
+  CAPITAN
+  ESPECTADOR
+}
+
+enum FormatoTorneo {
+  LIGA
+  ELIMINACION_DIRECTA
+  IDA_VUELTA
+}
+
+enum EstadoTorneo {
+  PENDIENTE
+  EN_CURSO
+  FINALIZADO
+}
+
+enum EstadoPago {
+  PENDIENTE
+  PAGADO
+  BLOQUEADO
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String
+  role          Role     @default(ESPECTADOR)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  torneosAdmin  Torneo[] @relation("AdminTorneos")
+  equipoCapitan Equipo[] @relation("CapitanEquipos")
+
+  @@map("users")
+}
+
+model Torneo {
+  id               String        @id @default(cuid())
+  nombre           String
+  descripcion      String?
+  logo             String?
+  formato          FormatoTorneo
+  estado           EstadoTorneo  @default(PENDIENTE)
+  puntosVictoria   Int           @default(3)
+  puntosEmpate     Int           @default(1)
+  puntosDerrota    Int           @default(0)
+  edicion          Int           @default(1)
+  fechaInicio      DateTime?
+  fechaFin         DateTime?
+  adminId          String
+  torneoOriginalId String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  admin          User    @relation("AdminTorneos", fields: [adminId], references: [id])
+  torneoOriginal Torneo? @relation("TorneoClones", fields: [torneoOriginalId], references: [id])
+  clones         Torneo[] @relation("TorneoClones")
+  equipos        Equipo[]
+
+  @@map("torneos")
+}
+
+model Equipo {
+  id         String     @id @default(cuid())
+  nombre     String
+  logo       String?
+  torneoId   String
+  capitanId  String?
+  estadoPago EstadoPago @default(PENDIENTE)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  torneo    Torneo    @relation(fields: [torneoId], references: [id], onDelete: Cascade)
+  capitan   User?     @relation("CapitanEquipos", fields: [capitanId], references: [id])
+  jugadores Jugador[]
+
+  @@map("equipos")
+}
+
+model Jugador {
+  id                String   @id @default(cuid())
+  nombre            String
+  numeroJugador     Int
+  equipoId          String
+  tarjetasAmarillas Int      @default(0)
+  tarjetasRojas     Int      @default(0)
+  suspendido        Boolean  @default(false)
+  goles             Int      @default(0)
+  asistencias       Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  equipo Equipo @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+
+  @@map("jugadores")
+}
