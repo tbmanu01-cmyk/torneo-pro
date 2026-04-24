@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import type { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { torneoSchema } from "@/lib/validations";
@@ -7,7 +8,7 @@ import type { FormatoTorneo, EstadoTorneo } from "@prisma/client";
 
 type Ctx = { params: { id: string } };
 
-function canAdmin(session: Awaited<ReturnType<typeof getServerSession>>, adminId: string) {
+function canAdmin(session: Session | null, adminId: string) {
   return session?.user.role === "SUPER_ADMIN" || session?.user.id === adminId;
 }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import type { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { equipoSchema } from "@/lib/validations";
@@ -7,7 +8,7 @@ import type { EstadoPago } from "@prisma/client";
 
 type Ctx = { params: { id: string } };
 
-async function getEquipoWithAuth(id: string, session: Awaited<ReturnType<typeof getServerSession>>) {
+async function getEquipoWithAuth(id: string, session: Session | null) {
   const equipo = await prisma.equipo.findUnique({
     where: { id },
     include: { torneo: { select: { adminId: true } } },

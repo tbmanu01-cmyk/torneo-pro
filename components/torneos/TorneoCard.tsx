@@ -20,7 +20,7 @@ export default function TorneoCard({ torneo, isAdmin }: TorneoCardProps) {
   const handleClone = () => {
     startTransition(async () => {
       const r = await cloneTorneo(torneo.id);
-      if ("error" in r) toast.error(r.error);
+      if ("error" in r) toast.error(r.error!);
       else { toast.success("Torneo clonado"); router.push(`/torneos/${r.torneo.id}`); }
     });
   };
@@ -29,7 +29,7 @@ export default function TorneoCard({ torneo, isAdmin }: TorneoCardProps) {
     if (!confirm(`¿Eliminar "${torneo.nombre}"? Se eliminarán todos sus equipos.`)) return;
     startTransition(async () => {
       const r = await deleteTorneo(torneo.id);
-      if ("error" in r) toast.error(r.error);
+      if ("error" in r) toast.error(r.error!);
       else { toast.success("Torneo eliminado"); router.refresh(); }
     });
   };

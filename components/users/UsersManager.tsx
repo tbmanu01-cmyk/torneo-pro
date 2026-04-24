@@ -35,7 +35,7 @@ export default function UsersManager({ initialUsers, currentUserId }: UsersManag
     startTransition(async () => {
       const result = await createUser(data as { name: string; email: string; password: string; role: string });
       if ("error" in result) {
-        toast.error(result.error);
+        toast.error(result.error!);
       } else {
         toast.success("Usuario creado correctamente");
         closeModal();
@@ -49,7 +49,7 @@ export default function UsersManager({ initialUsers, currentUserId }: UsersManag
       startTransition(async () => {
         const result = await updateUser(modal.user.id, data as { name: string; role: string });
         if ("error" in result) {
-          toast.error(result.error);
+          toast.error(result.error!);
         } else {
           toast.success("Usuario actualizado correctamente");
           closeModal();
@@ -64,7 +64,7 @@ export default function UsersManager({ initialUsers, currentUserId }: UsersManag
     startTransition(async () => {
       const result = await deleteUser(id);
       if ("error" in result) {
-        toast.error(result.error);
+        toast.error(result.error!);
       } else {
         toast.success("Usuario eliminado");
         router.refresh();

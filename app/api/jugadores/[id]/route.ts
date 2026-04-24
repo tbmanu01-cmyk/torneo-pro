@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import type { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { jugadorSchema } from "@/lib/validations";
 
 type Ctx = { params: { id: string } };
 
-async function getJugadorWithPerms(id: string, session: Awaited<ReturnType<typeof getServerSession>>) {
+async function getJugadorWithPerms(id: string, session: Session | null) {
   const jugador = await prisma.jugador.findUnique({
     where: { id },
     include: {

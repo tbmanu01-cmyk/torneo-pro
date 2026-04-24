@@ -37,7 +37,7 @@ export default function JugadoresManager({
   const handleCreate = (data: JugadorInput) => {
     startTransition(async () => {
       const r = await createJugador(equipoId, data);
-      if ("error" in r) toast.error(r.error);
+      if ("error" in r) toast.error(r.error!);
       else { toast.success("Jugador agregado"); closeModal(); router.refresh(); }
     });
   };
@@ -46,7 +46,7 @@ export default function JugadoresManager({
     if (!modal.open || modal.mode !== "edit") return;
     startTransition(async () => {
       const r = await updateJugador(modal.jugador.id, data);
-      if ("error" in r) toast.error(r.error);
+      if ("error" in r) toast.error(r.error!);
       else { toast.success("Jugador actualizado"); closeModal(); router.refresh(); }
     });
   };
@@ -55,7 +55,7 @@ export default function JugadoresManager({
     if (!confirm("¿Eliminar este jugador?")) return;
     startTransition(async () => {
       const r = await deleteJugador(id);
-      if ("error" in r) toast.error(r.error);
+      if ("error" in r) toast.error(r.error!);
       else { toast.success("Jugador eliminado"); router.refresh(); }
     });
   };

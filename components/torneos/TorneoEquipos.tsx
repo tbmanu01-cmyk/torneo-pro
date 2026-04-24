@@ -32,7 +32,7 @@ export default function TorneoEquipos({ torneoId, equipos, isAdmin }: TorneoEqui
   const handleCreate = (data: EquipoInput) => {
     startTransition(async () => {
       const r = await createEquipo(torneoId, data);
-      if ("error" in r) toast.error(r.error);
+      if ("error" in r) toast.error(r.error!);
       else { toast.success("Equipo creado"); closeModal(); router.refresh(); }
     });
   };
@@ -41,7 +41,7 @@ export default function TorneoEquipos({ torneoId, equipos, isAdmin }: TorneoEqui
     if (!modal.open || modal.mode !== "edit") return;
     startTransition(async () => {
       const r = await updateEquipo(modal.equipo.id, data);
-      if ("error" in r) toast.error(r.error);
+      if ("error" in r) toast.error(r.error!);
       else { toast.success("Equipo actualizado"); closeModal(); router.refresh(); }
     });
   };
@@ -50,7 +50,7 @@ export default function TorneoEquipos({ torneoId, equipos, isAdmin }: TorneoEqui
     if (!confirm("¿Eliminar este equipo y todos sus jugadores?")) return;
     startTransition(async () => {
       const r = await deleteEquipo(id);
-      if ("error" in r) toast.error(r.error);
+      if ("error" in r) toast.error(r.error!);
       else { toast.success("Equipo eliminado"); router.refresh(); }
     });
   };

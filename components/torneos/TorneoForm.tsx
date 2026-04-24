@@ -62,7 +62,7 @@ export default function TorneoForm({ initialData, torneoId }: TorneoFormProps) {
         : await createTorneo(data);
 
       if ("error" in result) {
-        toast.error(result.error);
+        toast.error(result.error!);
       } else {
         toast.success(isEdit ? "Torneo actualizado" : "Torneo creado");
         router.push(`/torneos/${result.torneo.id}`);
