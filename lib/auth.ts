@@ -3,14 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
-export type AppSession = {
-  user: { id: string; role: string; name?: string | null; email?: string | null; image?: string | null };
-} | null;
-
-export async function auth(): Promise<AppSession> {
-  return getServerSession(authOptions) as Promise<AppSession>;
-}
-
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -63,3 +55,11 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+export type AppSession = {
+  user: { id: string; role: string; name?: string | null; email?: string | null; image?: string | null };
+} | null;
+
+export async function auth(): Promise<AppSession> {
+  return getServerSession(authOptions) as Promise<AppSession>;
+}
