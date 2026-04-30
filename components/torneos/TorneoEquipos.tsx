@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import EquipoCard from "@/components/equipos/EquipoCard";
 import EquipoForm from "@/components/equipos/EquipoForm";
+import InscribirClubModal from "@/components/torneos/InscribirClubModal";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import { createEquipo, updateEquipo, deleteEquipo } from "@/lib/actions/equipos";
-import type { EquipoRow } from "@/types";
+import type { EquipoRow, ClubRow } from "@/types";
 import type { EquipoInput } from "@/lib/validations";
 
 type ModalState =
@@ -16,18 +17,24 @@ type ModalState =
   | { open: true; mode: "create" }
   | { open: true; mode: "edit"; equipo: EquipoRow };
 
-interface TorneoEquiposProps {
+interface Props {
   torneoId:  string;
   equipos:   EquipoRow[];
+  clubs:     ClubRow[];
   isAdmin:   boolean;
 }
 
-export default function TorneoEquipos({ torneoId, equipos, isAdmin }: TorneoEquiposProps) {
+export default function TorneoEquipos({ torneoId, equipos, clubs, isAdmin }: Props) {
   const router = useRouter();
-  const [modal, setModal] = useState<ModalState>({ open: false });
-  const [isPending, startTransition] = useTransition();
+  const [modal,         setModal]         = useState<ModalState>({ open: false });
+  const [showInscribir, setShowInscribir] = useState(false);
+  const [isPending, startTransition]      = useTransition();
 
   const closeModal = () => setModal({ open: false });
+
+  const clubsInscritos = equipos
+    .map((e) => e.clubId)
+    .filter((id): id is string => id !== null);
 
   const handleCreate = (data: EquipoInput) => {
     startTransition(async () => {
@@ -47,27 +54,36 @@ export default function TorneoEquipos({ torneoId, equipos, isAdmin }: TorneoEqui
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm("¿Eliminar este equipo y todos sus jugadores?")) return;
+    if (!confirm("¿Retirar este equipo del torneo?")) return;
     startTransition(async () => {
       const r = await deleteEquipo(id);
       if ("error" in r) toast.error(r.error!);
-      else { toast.success("Equipo eliminado"); router.refresh(); }
+      else { toast.success("Equipo retirado"); router.refresh(); }
     });
   };
 
   return (
     <>
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between flex-wrap gap-2">
         <p className="text-sm text-gray-500">
           {equipos.length} equipo{equipos.length !== 1 ? "s" : ""} participando
         </p>
         {isAdmin && (
-          <Button
-            onClick={() => setModal({ open: true, mode: "create" })}
-            loading={isPending}
-          >
-            + Agregar Equipo
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowInscribir(true)}
+              loading={isPending}
+            >
+              📋 Inscribir Club
+            </Button>
+            <Button
+              onClick={() => setModal({ open: true, mode: "create" })}
+              loading={isPending}
+            >
+              + Equipo manual
+            </Button>
+          </div>
         )}
       </div>
 
@@ -76,7 +92,9 @@ export default function TorneoEquipos({ torneoId, equipos, isAdmin }: TorneoEqui
           <p className="text-4xl mb-3">👕</p>
           <p className="font-medium">No hay equipos en este torneo</p>
           {isAdmin && (
-            <p className="text-sm mt-1">Haz clic en "Agregar Equipo" para comenzar</p>
+            <p className="text-sm mt-1">
+              Inscribe un club existente o crea un equipo manual
+            </p>
           )}
         </div>
       ) : (
@@ -94,6 +112,7 @@ export default function TorneoEquipos({ torneoId, equipos, isAdmin }: TorneoEqui
         </div>
       )}
 
+      {/* Modal equipo manual */}
       <Modal
         isOpen={modal.open}
         onClose={closeModal}
@@ -107,6 +126,15 @@ export default function TorneoEquipos({ torneoId, equipos, isAdmin }: TorneoEqui
           isAdmin={isAdmin}
         />
       </Modal>
+
+      {/* Modal inscribir club */}
+      <InscribirClubModal
+        isOpen={showInscribir}
+        onClose={() => setShowInscribir(false)}
+        torneoId={torneoId}
+        clubs={clubs}
+        clubsInscritos={clubsInscritos}
+      />
     </>
   );
 }

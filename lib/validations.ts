@@ -35,9 +35,9 @@ export const updateUserAdminSchema = z.object({
 
 // ─── Torneos ──────────────────────────────────────────────────────────────────
 
-const FORMATOS    = ["LIGA", "ELIMINACION_DIRECTA", "IDA_VUELTA"] as const;
-const ESTADOS_T   = ["PENDIENTE", "EN_CURSO", "FINALIZADO"] as const;
-const ESTADOS_P   = ["PENDIENTE", "PAGADO", "BLOQUEADO"] as const;
+const FORMATOS  = ["LIGA", "ELIMINACION_DIRECTA", "IDA_VUELTA"] as const;
+const ESTADOS_T = ["PENDIENTE", "EN_CURSO", "FINALIZADO"] as const;
+const ESTADOS_P = ["PENDIENTE", "PAGADO", "BLOQUEADO"] as const;
 
 export const torneoSchema = z.object({
   nombre:         z.string().min(2, "Mínimo 2 caracteres"),
@@ -74,8 +74,18 @@ export const jugadorSchema = z.object({
   suspendido:        z.boolean().default(false),
 });
 
+// ─── Clubs ────────────────────────────────────────────────────────────────────
+
+export const clubSchema = z.object({
+  nombre:    z.string().min(2, "Mínimo 2 caracteres"),
+  logo:      z.string().optional(),
+  ciudad:    z.string().optional(),
+  capitanId: z.string().optional(),
+});
+
 // ─── Inferred types ───────────────────────────────────────────────────────────
 
+export type ClubInput            = z.infer<typeof clubSchema>;
 export type LoginInput           = z.infer<typeof loginSchema>;
 export type RegisterInput        = z.infer<typeof registerSchema>;
 export type CreateUserAdminInput = z.infer<typeof createUserAdminSchema>;

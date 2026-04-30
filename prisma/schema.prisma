@@ -35,6 +35,26 @@ enum EstadoPago {
   BLOQUEADO
 }
 
+enum EstadoJornada {
+  PENDIENTE
+  EN_CURSO
+  FINALIZADA
+}
+
+enum EstadoPartido {
+  PENDIENTE
+  EN_CURSO
+  FINALIZADO
+  SUSPENDIDO
+}
+
+enum TipoEvento {
+  GOL
+  TARJETA_AMARILLA
+  TARJETA_ROJA
+  CAMBIO
+}
+
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 model User {
@@ -46,10 +66,27 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  torneosAdmin  Torneo[] @relation("AdminTorneos")
-  equipoCapitan Equipo[] @relation("CapitanEquipos")
+  torneosAdmin  Torneo[]  @relation("AdminTorneos")
+  equipoCapitan Equipo[]  @relation("CapitanEquipos")
+  clubCapitan   Club[]    @relation("CapitanClubs")
+  actasCerradas Partido[] @relation("ActasCerradas")
 
   @@map("users")
+}
+
+model Club {
+  id         String   @id @default(cuid())
+  nombre     String
+  logo       String?
+  ciudad     String?
+  capitanId  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  capitan User?    @relation("CapitanClubs", fields: [capitanId], references: [id])
+  equipos Equipo[]
+
+  @@map("clubs")
 }
 
 model Torneo {
@@ -70,10 +107,11 @@ model Torneo {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
-  admin          User    @relation("AdminTorneos", fields: [adminId], references: [id])
-  torneoOriginal Torneo? @relation("TorneoClones", fields: [torneoOriginalId], references: [id])
-  clones         Torneo[] @relation("TorneoClones")
+  admin          User      @relation("AdminTorneos", fields: [adminId], references: [id])
+  torneoOriginal Torneo?   @relation("TorneoClones", fields: [torneoOriginalId], references: [id])
+  clones         Torneo[]  @relation("TorneoClones")
   equipos        Equipo[]
+  jornadas       Jornada[]
 
   @@map("torneos")
 }
@@ -83,14 +121,19 @@ model Equipo {
   nombre     String
   logo       String?
   torneoId   String
+  clubId     String?
   capitanId  String?
   estadoPago EstadoPago @default(PENDIENTE)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
-  torneo    Torneo    @relation(fields: [torneoId], references: [id], onDelete: Cascade)
-  capitan   User?     @relation("CapitanEquipos", fields: [capitanId], references: [id])
-  jugadores Jugador[]
+  torneo            Torneo          @relation(fields: [torneoId], references: [id], onDelete: Cascade)
+  club              Club?           @relation(fields: [clubId],  references: [id])
+  capitan           User?           @relation("CapitanEquipos", fields: [capitanId], references: [id])
+  jugadores         Jugador[]
+  partidosLocal     Partido[]       @relation("PartidosLocal")
+  partidosVisitante Partido[]       @relation("PartidosVisitante")
+  eventos           EventoPartido[]
 
   @@map("equipos")
 }
@@ -108,7 +151,70 @@ model Jugador {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  equipo Equipo @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+  equipo            Equipo          @relation(fields: [equipoId], references: [id], onDelete: Cascade)
+  eventos           EventoPartido[] @relation("EventosJugador")
+  eventosAsistencia EventoPartido[] @relation("AsistenciaEventos")
 
   @@map("jugadores")
+}
+
+model Jornada {
+  id        String        @id @default(cuid())
+  numero    Int
+  torneoId  String
+  nombre    String
+  fecha     DateTime?
+  estado    EstadoJornada @default(PENDIENTE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  torneo   Torneo    @relation(fields: [torneoId], references: [id], onDelete: Cascade)
+  partidos Partido[]
+
+  @@map("jornadas")
+}
+
+model Partido {
+  id                String        @id @default(cuid())
+  jornadaId         String
+  equipoLocalId     String?
+  equipoVisitanteId String?
+  golesLocal        Int           @default(0)
+  golesVisitante    Int           @default(0)
+  fecha             DateTime?
+  hora              String?
+  cancha            String?
+  estado            EstadoPartido @default(PENDIENTE)
+  actaCerrada       Boolean       @default(false)
+  cerradaPorId      String?
+  fechaCierre       DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  jornada         Jornada         @relation(fields: [jornadaId],         references: [id], onDelete: Cascade)
+  equipoLocal     Equipo?         @relation("PartidosLocal",     fields: [equipoLocalId],     references: [id])
+  equipoVisitante Equipo?         @relation("PartidosVisitante", fields: [equipoVisitanteId], references: [id])
+  cerradaPor      User?           @relation("ActasCerradas",     fields: [cerradaPorId],      references: [id])
+  eventos         EventoPartido[]
+
+  @@map("partidos")
+}
+
+model EventoPartido {
+  id                  String     @id @default(cuid())
+  partidoId           String
+  tipo                TipoEvento
+  jugadorId           String
+  equipoId            String
+  minuto              Int        @default(0)
+  asistenciaJugadorId String?
+  notas               String?
+  createdAt           DateTime   @default(now())
+
+  partido           Partido  @relation(fields: [partidoId], references: [id], onDelete: Cascade)
+  jugador           Jugador  @relation("EventosJugador",     fields: [jugadorId],           references: [id])
+  equipo            Equipo   @relation(fields: [equipoId],  references: [id])
+  asistenciaJugador Jugador? @relation("AsistenciaEventos", fields: [asistenciaJugadorId], references: [id])
+
+  @@map("eventos_partido")
 }
