@@ -227,12 +227,20 @@ export default async function TorneoDetailPage({
             </div>
 
             {isAdmin && (
-              <Link
-                href={`/torneos/${torneo.id}/editar`}
-                className="flex-shrink-0 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:border-blue-400 hover:text-blue-600 transition-colors"
-              >
-                ✏️ Editar
-              </Link>
+              <div className="flex flex-shrink-0 gap-2">
+                <Link
+                  href={`/torneos/${torneo.id}/pagos`}
+                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:border-green-400 hover:text-green-700 transition-colors"
+                >
+                  Pagos
+                </Link>
+                <Link
+                  href={`/torneos/${torneo.id}/editar`}
+                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:border-blue-400 hover:text-blue-600 transition-colors"
+                >
+                  ✏️ Editar
+                </Link>
+              </div>
             )}
           </div>
 

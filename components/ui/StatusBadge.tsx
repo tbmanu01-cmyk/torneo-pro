@@ -6,8 +6,12 @@ const CONFIG: Record<string, { label: string; className: string }> = {
   FINALIZADA:          { label: "Finalizada",           className: "bg-gray-100 text-gray-600"    },
   SUSPENDIDO:          { label: "Suspendido",           className: "bg-red-100 text-red-700"      },
   // EstadoPago
+  PARCIAL:             { label: "Primera cuota pagada", className: "bg-orange-100 text-orange-700"},
   PAGADO:              { label: "Pagado",               className: "bg-green-100 text-green-800"  },
   BLOQUEADO:           { label: "Bloqueado",            className: "bg-red-100 text-red-700"      },
+  // EstadoComprobante
+  APROBADO:            { label: "Aprobado",             className: "bg-green-100 text-green-800"  },
+  RECHAZADO:           { label: "Rechazado",            className: "bg-red-100 text-red-700"      },
   // FormatoTorneo
   LIGA:                { label: "Liga",                 className: "bg-blue-100 text-blue-800"    },
   ELIMINACION_DIRECTA: { label: "Eliminación Directa", className: "bg-orange-100 text-orange-800"},

@@ -31,6 +31,7 @@ enum EstadoTorneo {
 
 enum EstadoPago {
   PENDIENTE
+  PARCIAL
   PAGADO
   BLOQUEADO
 }
@@ -55,6 +56,12 @@ enum TipoEvento {
   CAMBIO
 }
 
+enum EstadoComprobante {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 model User {
@@ -70,6 +77,7 @@ model User {
   equipoCapitan Equipo[]  @relation("CapitanEquipos")
   clubCapitan   Club[]    @relation("CapitanClubs")
   actasCerradas Partido[] @relation("ActasCerradas")
+  pagosAprobados Pago[]   @relation("PagosAprobados")
 
   @@map("users")
 }
@@ -107,11 +115,13 @@ model Torneo {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
-  admin          User      @relation("AdminTorneos", fields: [adminId], references: [id])
-  torneoOriginal Torneo?   @relation("TorneoClones", fields: [torneoOriginalId], references: [id])
-  clones         Torneo[]  @relation("TorneoClones")
-  equipos        Equipo[]
-  jornadas       Jornada[]
+  admin               User                 @relation("AdminTorneos", fields: [adminId], references: [id])
+  torneoOriginal      Torneo?              @relation("TorneoClones", fields: [torneoOriginalId], references: [id])
+  clones              Torneo[]             @relation("TorneoClones")
+  equipos             Equipo[]
+  jornadas            Jornada[]
+  configuracionPago   ConfiguracionPago?
+  pagos               Pago[]
 
   @@map("torneos")
 }
@@ -134,6 +144,7 @@ model Equipo {
   partidosLocal     Partido[]       @relation("PartidosLocal")
   partidosVisitante Partido[]       @relation("PartidosVisitante")
   eventos           EventoPartido[]
+  pagos             Pago[]
 
   @@map("equipos")
 }
@@ -217,4 +228,47 @@ model EventoPartido {
   asistenciaJugador Jugador? @relation("AsistenciaEventos", fields: [asistenciaJugadorId], references: [id])
 
   @@map("eventos_partido")
+}
+
+model ConfiguracionPago {
+  id                      String    @id @default(cuid())
+  torneoId                String    @unique
+  montoInscripcion        Float
+  moneda                  String    @default("VES")
+  permiteCuotas           Boolean   @default(false)
+  numeroCuotas            Int?
+  montoPrimeraCuota       Float?
+  montoSegundaCuota       Float?
+  fechaLimitePrimeraCuota DateTime?
+  fechaLimiteSegundaCuota DateTime?
+  datosPagoMovil          Json
+  instrucciones           String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  torneo Torneo @relation(fields: [torneoId], references: [id], onDelete: Cascade)
+
+  @@map("configuraciones_pago")
+}
+
+model Pago {
+  id              String            @id @default(cuid())
+  equipoId        String
+  torneoId        String
+  monto           Float
+  numeroCuota      Int               @default(1)
+  numeroReferencia String?
+  comprobante      String
+  estado           EstadoComprobante @default(PENDIENTE)
+  motivoRechazo   String?
+  aprobadoPorId   String?
+  fechaAprobacion DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  equipo      Equipo @relation(fields: [equipoId],   references: [id], onDelete: Cascade)
+  torneo      Torneo @relation(fields: [torneoId],   references: [id], onDelete: Cascade)
+  aprobadoPor User?  @relation("PagosAprobados",     fields: [aprobadoPorId], references: [id])
+
+  @@map("pagos")
 }

@@ -19,11 +19,15 @@ export async function POST(req: Request) {
     const folder = (data.get("folder") as string) || "general";
 
     if (!file) return NextResponse.json({ error: "No se proporcionó archivo" }, { status: 400 });
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Solo se permiten imágenes" }, { status: 400 });
+
+    const isImage = file.type.startsWith("image/");
+    const isPdf   = file.type === "application/pdf";
+
+    if (!isImage && !isPdf) {
+      return NextResponse.json({ error: "Solo se permiten imágenes (JPG, PNG) y PDFs" }, { status: 400 });
     }
     if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "La imagen no puede superar 5MB" }, { status: 400 });
+      return NextResponse.json({ error: "El archivo no puede superar 5MB" }, { status: 400 });
     }
 
     const bytes  = await file.arrayBuffer();
@@ -32,7 +36,7 @@ export async function POST(req: Request) {
     const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
-          { folder: `torneo-pro/${folder}`, resource_type: "image" },
+          { folder: `torneo-pro/${folder}`, resource_type: "auto" },
           (err, res) => (err ? reject(err) : resolve(res as { secure_url: string }))
         )
         .end(buffer);
@@ -41,6 +45,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: result.secure_url });
   } catch (err) {
     console.error("Upload error:", err);
-    return NextResponse.json({ error: "Error al subir imagen" }, { status: 500 });
+    return NextResponse.json({ error: "Error al subir archivo" }, { status: 500 });
   }
 }

@@ -56,6 +56,12 @@ export default function EquipoCard({ equipo, isAdmin, onEdit, onDelete, isPendin
         >
           Ver plantilla
         </Link>
+        <Link
+          href={`/equipos/${equipo.id}/pagos`}
+          className="flex-1 rounded-lg border border-gray-200 px-3 py-1.5 text-center text-xs font-medium text-gray-700 hover:border-green-400 hover:text-green-700 transition-colors"
+        >
+          Pagos
+        </Link>
         {isAdmin && (
           <>
             <button

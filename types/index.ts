@@ -1,7 +1,7 @@
 export type Role          = "SUPER_ADMIN" | "ADMIN_TORNEO" | "ASISTENTE" | "CAPITAN" | "ESPECTADOR"
 export type FormatoTorneo = "LIGA" | "ELIMINACION_DIRECTA" | "IDA_VUELTA"
 export type EstadoTorneo  = "PENDIENTE" | "EN_CURSO" | "FINALIZADO"
-export type EstadoPago    = "PENDIENTE" | "PAGADO" | "BLOQUEADO"
+export type EstadoPago    = "PENDIENTE" | "PARCIAL" | "PAGADO" | "BLOQUEADO"
 export type EstadoJornada = "PENDIENTE" | "EN_CURSO" | "FINALIZADA"
 export type EstadoPartido = "PENDIENTE" | "EN_CURSO" | "FINALIZADO" | "SUSPENDIDO"
 
@@ -103,3 +103,43 @@ export type JornadaRow = {
   partidos:  PartidoRow[]
   createdAt: Date
 }
+
+export type DatosPagoMovil = {
+  banco:    string;
+  telefono: string;
+  cedula:   string;
+  titular:  string;
+};
+
+export type ConfiguracionPagoRow = {
+  id:                      string;
+  torneoId:                string;
+  montoInscripcion:        number;
+  moneda:                  string;
+  permiteCuotas:           boolean;
+  numeroCuotas:            number | null;
+  montoPrimeraCuota:       number | null;
+  montoSegundaCuota:       number | null;
+  fechaLimitePrimeraCuota: Date | null;
+  fechaLimiteSegundaCuota: Date | null;
+  datosPagoMovil:          DatosPagoMovil;
+  instrucciones:           string | null;
+  createdAt:               Date;
+};
+
+export type PagoRow = {
+  id:               string;
+  equipoId:         string;
+  torneoId:         string;
+  monto:            number;
+  numeroCuota:      number;
+  numeroReferencia: string | null;
+  comprobante:      string;
+  estado:           "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  motivoRechazo:    string | null;
+  aprobadoPorId:    string | null;
+  fechaAprobacion:  Date | null;
+  createdAt:        Date;
+  equipo?:          { id: string; nombre: string; logo: string | null };
+  aprobadoPor?:     { name: string } | null;
+};

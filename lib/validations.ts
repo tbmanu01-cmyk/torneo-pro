@@ -37,7 +37,7 @@ export const updateUserAdminSchema = z.object({
 
 const FORMATOS  = ["LIGA", "ELIMINACION_DIRECTA", "IDA_VUELTA"] as const;
 const ESTADOS_T = ["PENDIENTE", "EN_CURSO", "FINALIZADO"] as const;
-const ESTADOS_P = ["PENDIENTE", "PAGADO", "BLOQUEADO"] as const;
+const ESTADOS_P = ["PENDIENTE", "PARCIAL", "PAGADO", "BLOQUEADO"] as const;
 
 export const torneoSchema = z.object({
   nombre:         z.string().min(2, "Mínimo 2 caracteres"),
@@ -82,6 +82,28 @@ export const clubSchema = z.object({
   ciudad:    z.string().optional(),
   capitanId: z.string().optional(),
 });
+
+// ─── Pagos ────────────────────────────────────────────────────────────────────
+
+const MONEDAS = ["VES", "USD", "COP", "EUR"] as const;
+
+export const configuracionPagoSchema = z.object({
+  montoInscripcion:        z.coerce.number().positive("Debe ser mayor a 0"),
+  moneda:                  z.enum(MONEDAS).default("VES"),
+  permiteCuotas:           z.boolean().default(false),
+  numeroCuotas:            z.coerce.number().int().min(1).max(2).optional(),
+  montoPrimeraCuota:       z.coerce.number().positive().optional(),
+  montoSegundaCuota:       z.coerce.number().positive().optional(),
+  fechaLimitePrimeraCuota: z.string().optional(),
+  fechaLimiteSegundaCuota: z.string().optional(),
+  banco:                   z.string().min(2, "Requerido"),
+  telefono:                z.string().min(10, "Teléfono requerido"),
+  cedula:                  z.string().min(4, "Cédula requerida"),
+  titular:                 z.string().min(2, "Requerido"),
+  instrucciones:           z.string().optional(),
+});
+
+export type ConfiguracionPagoInput = z.infer<typeof configuracionPagoSchema>;
 
 // ─── Inferred types ───────────────────────────────────────────────────────────
 

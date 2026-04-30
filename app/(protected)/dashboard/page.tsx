@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import RoleBadge from "@/components/ui/RoleBadge";
+import { prisma } from "@/lib/prisma";
 import type { Role } from "@/types";
 
 type DashboardCard = {
@@ -101,10 +102,10 @@ const ROLE_CONFIG: Record<
       },
       {
         title:       "Pagos",
-        description: "Revisa el estado de pagos e inscripciones",
+        description: "Sube tu comprobante y revisa el estado de pago de tu equipo",
         icon:        "💳",
-        href:        "/payments",
-        enabled:     false,
+        href:        "/torneos",
+        enabled:     true,
       },
       {
         title:       "Calendario",
@@ -142,6 +143,18 @@ export default async function DashboardPage() {
 
   const role = session.user.role as Role;
   const config = ROLE_CONFIG[role] ?? ROLE_CONFIG.ESPECTADOR;
+
+  // Si es capitán, apuntar "Pagos" directo al equipo
+  if (role === "CAPITAN") {
+    const equipo = await prisma.equipo.findFirst({
+      where:   { capitanId: session.user.id },
+      orderBy: { createdAt: "desc" },
+    });
+    if (equipo) {
+      const pagosCard = config.cards.find((c) => c.title === "Pagos");
+      if (pagosCard) pagosCard.href = `/equipos/${equipo.id}/pagos`;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
